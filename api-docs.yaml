@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  title: Game API
+  description: API for managing users and game entries
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000  # Change to your server URL
+tags:
+  - name: Users
+    description: User management operations
+  - name: Games
+    description: Game management operations
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '500':
+          description: Registration failed
+
+  /auth/login:
+    post:
+      tags:
+        - Users
+      summary: Login an existing user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+        '500':
+          description: Login failed
+
+  /api/game:
+    post:
+      tags:
+        - Games
+      summary: Create a new game entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gameId:
+                  type: string
+                playerStats:
+                  type: object
+                gameResult:
+                  type: string
+      responses:
+        '201':
+          description: Game entry created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Failed to create game entry
+
+  /api/games:
+    get:
+      tags:
+        - Games
+      summary: Get all game entries for a user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved game entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    userId:
+                      type: string
+                    gameId:
+                      type: string
+                    playerStats:
+                      type: object
+                    gameResult:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+        '500':
+          description: Failed to retrieve game data
+
+  /api/games/{gameId}:
+    put:
+      tags:
+        - Games
+      summary: Update a game entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          description: ID of the game to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Game entry updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Failed to update game entry
+
+    delete:
+      tags:
+        - Games
+      summary: Delete a game entry
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          description: ID of the game to delete
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game entry deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '500':
+          description: Failed to delete game entry
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
