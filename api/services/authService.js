@@ -31,6 +31,9 @@ export const loginUser = async (email, password ) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    
+    user.currentSessionToken = token;
+    await mysqlConnection.query('UPDATE users SET currentSessionToken = ? WHERE email = ?', [token, email]);    
     return {user, token};
   }catch(error){
     throw new Error('Login failed');
