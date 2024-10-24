@@ -3,12 +3,14 @@ import dotenv from 'dotenv';
 import bodyParser from 'body-parser';
 import authRoutes from './api/routes/authRoutes.js';
 import gameRoutes from './api/routes/gameRoutes.js';
-import { connectRabbitMQ } from './config/rabbitmq.js';
+// import { connectRabbitMQ } from './config/rabbitmq.js';
 import { subscribeToUserRegister } from './rabbitmq/subscriber.js';
-import { mysqlConnection } from './config/db.js';
-import mongoose from 'mongoose';
+// import { mysqlConnection } from './config/db.js';
+// import mongoose from 'mongoose';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import setupSwagger from './swagger.js';
+import { connectMySQL, connectMongoDB } from './config/db.js';
+import { connectRabbitMQ } from './config/rabbitmq.js';
 
 dotenv.config();
 
@@ -26,13 +28,16 @@ setupSwagger(app);
 const startServer = async () => {
   try {
     // Check MySQL connection
-    await mysqlConnection.getConnection();
-    console.log('MySQL connected');
+    // await mysqlConnection.getConnection();
+    await connectMySQL();
+    // console.log('MySQL connected');
 
     // Check MongoDB connection
-    await mongoose.connection;
+    // await mongoose.connection;
+    await connectMongoDB();
 
-    // // Connect to RabbitMQ and subscribe to events
+    // Connect to RabbitMQ and subscribe to events
+    // await connectRabbitMQ();
     await connectRabbitMQ();
     subscribeToUserRegister();
 
